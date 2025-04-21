@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common'
 import { NextFunction, Request, Response } from 'express'
-import Logging from 'library/Logging'
+import Logging from '../library/Logging'
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {

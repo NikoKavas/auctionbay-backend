@@ -7,6 +7,8 @@ import { PrismaModule } from './database/prisma.module';
 import { LoggerMiddleware } from 'middleware/logger.middleware';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { AuthModule } from './auth/auth.module';
     PrismaModule,
     UsersModule,
     AuthModule,
+    PermissionsModule,
+    RolesModule
   ],
   controllers: [AppController],
   providers: [AppService],

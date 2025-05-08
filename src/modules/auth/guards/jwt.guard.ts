@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable } from '@nestjs/common'
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { JwtService } from '@nestjs/jwt'
 import { AuthGuard } from '@nestjs/passport'
@@ -10,19 +10,23 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super()
   }
 
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const isPublic = this.reflector.getAllAndOverride('isPublic', [context.getHandler(), context.getClass()])
-    const request = context.switchToHttp().getRequest()
-
+  canActivate(context: ExecutionContext) {
+    // respect @Public()  
+    const isPublic = this.reflector.getAllAndOverride<boolean>(
+      'isPublic',
+      [context.getHandler(), context.getClass()],
+    );
     if (isPublic) {
-      return true
+      return true;
     }
+    // let passport do its thing (validate + populate req.user)
+    return super.canActivate(context) as boolean | Promise<boolean>;
+  }
 
-    try {
-      const access_token = request.cookies['access_token']
-      return !!this.jwtService.verify(access_token)
-    } catch (error) {
-      return false
+  handleRequest(err, user, info) {
+    if (err || !user) {
+      throw err || new UnauthorizedException();
     }
+    return user;
   }
 }

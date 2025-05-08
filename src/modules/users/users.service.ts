@@ -122,7 +122,6 @@ export class UsersService {
       }
     }
 
-    // Če spreminjaš geslo, ga prehashiraj
     if (dto.password) {
       if (await compareHash(dto.password, user.password)) {
         throw new BadRequestException('New password cannot be the same as the old password');
@@ -148,7 +147,6 @@ export class UsersService {
     }
   }
 
-  /** Zbriši uporabnika */
   async remove(id: string): Promise<User> {
     await this.findById(id);
     try {
@@ -159,9 +157,18 @@ export class UsersService {
     }
   }
 
-  /** Samo za posodobitev avatarja (ali drugega polja) */
   async updateUserImageId(id: string, avatar: string): Promise<User> {
-    // Preprosto kličemo update z avatarjem
     return this.update(id, { avatar } as UpdateUserDto);
+  }
+
+  async changePassword(userId: string, newHashedPassword: string): Promise<User> {
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: { password: newHashedPassword },
+      });
+    } catch (err) {
+      throw new InternalServerErrorException('Could not update password');
+    }
   }
 }

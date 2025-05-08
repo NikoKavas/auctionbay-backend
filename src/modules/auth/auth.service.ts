@@ -7,6 +7,7 @@ import { UsersService } from 'modules/users/users.service'
 import { compareHash, hash } from 'utils/bycrpt'
 
 import { RegisterUserDto } from './dto/register-user.dto'
+import { UpdatePasswordDto } from './dto/update-password.dto'
 
 @Injectable()
 export class AuthService {
@@ -52,4 +53,18 @@ export class AuthService {
     const user = request.user as User
     return user.id
   }
+
+  async updatePassword(userId: string, dto: UpdatePasswordDto) {
+    const user = await this.usersService.findById(userId);
+
+    if (!(await compareHash(dto.oldPassword, user.password))) {
+      throw new UnauthorizedException('Old password is incorrect');
+    }
+    if (dto.newPassword !== dto.confirmPassword) {
+      throw new BadRequestException('New password and confirmation do not match');
+    }
+    const newHash = await hash(dto.newPassword);
+    return this.usersService.changePassword(userId, newHash);
+  }
+
 }

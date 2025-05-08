@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
@@ -20,6 +21,8 @@ import { RequestWithUser } from 'interfaces/auth.interface'
 import { AuthService } from './auth.service'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { LocalAuthGuard } from './guards/local-auth.guard'
+import { UpdatePasswordDto } from './dto/update-password.dto'
+import { JwtAuthGuard } from './guards/jwt.guard'
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -43,7 +46,7 @@ export class AuthController {
     return req.user
   }
 
-  @Get()
+  @Get('me')
   @HttpCode(HttpStatus.OK)
   async user(@Req() req: Request): Promise<User> {
     const cookie = req.cookies['access_token']
@@ -55,5 +58,18 @@ export class AuthController {
   async signout(@Res({ passthrough: true }) res: Response): Promise<{ msg: string }> {
     res.clearCookie('access_token')
     return { msg: 'ok' }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/update-password')
+  @HttpCode(HttpStatus.OK)
+  async updatePassword(
+    @Req() req: Request,                    
+    @Body() dto: UpdatePasswordDto,
+  ): Promise<{ message: string }> {
+    const cookie = req.cookies['access_token'];
+    const user = await this.authService.user(cookie);
+    await this.authService.updatePassword(user.id, dto);
+    return { message: 'Password updated successfully' };
   }
 }

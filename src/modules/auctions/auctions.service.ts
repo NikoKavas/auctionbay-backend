@@ -19,6 +19,11 @@ export class AuctionsService {
     return this.prisma.auction.findMany({
       where: { endTime: { gt: now } },
       orderBy: { endTime: 'asc' },
+      include: {
+        bids: {
+          orderBy: { createdAt: 'desc' }  
+        }
+      }
     });
   }
 

@@ -27,6 +27,15 @@ export class AuctionsService {
     });
   }
 
+    async findById(id: string): Promise<Auction> {
+    const auction = await this.prisma.auction.findUnique({
+      where: { id },
+      include: { bids: { orderBy: { createdAt: 'desc' } } },
+    });
+    if (!auction) throw new NotFoundException('Auction not found');
+    return auction;
+  }
+
   // Ustvari novo avkcijo za prijavljenega userja 
   async createForUser(userId: string, dto: CreateAuctionDto): Promise<Auction> {
     return this.prisma.auction.create({

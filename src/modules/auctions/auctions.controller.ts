@@ -17,6 +17,7 @@ import {
   import { CreateAuctionDto } from './dto/create-auction.dto';
   import { UpdateAuctionDto } from './dto/update-auction.dto';
   import { BidDto } from './dto/bid.dto';
+import { Auction } from '@prisma/client';
   
   @Controller()
   export class AuctionsController {
@@ -47,6 +48,12 @@ import {
     @HttpCode(HttpStatus.OK)
     listActive() {
       return this.auctions.listActive();
+    }
+
+    @Get('auctions/:id')
+    @HttpCode(HttpStatus.OK)
+    getOne(@Param('id') id: string): Promise<Auction> {
+      return this.auctions.findById(id); // implementiraš v service, vključi tudi bids
     }
   
     // /auctions/:id/bid 

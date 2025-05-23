@@ -82,4 +82,12 @@ export class AuctionsService {
       },
     });
   }
+
+  async listForUser(userId: string): Promise<Auction[]> {
+    return this.prisma.auction.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: { bids: { orderBy: { createdAt: 'desc' } } },
+    });
+  }
 }

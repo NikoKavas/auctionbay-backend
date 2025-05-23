@@ -67,5 +67,14 @@ import { Auction } from '@prisma/client';
     ) {
       return this.auctions.bidOnAuction(req.user.id, auctionId, dto);
     }
+
+    
+    @UseGuards(JwtAuthGuard)
+    @Get('me/auction')
+    @HttpCode(HttpStatus.OK)
+    listForMe(@Req() req) {
+    return this.auctions.listForUser(req.user.id);
+}
+
   }
   

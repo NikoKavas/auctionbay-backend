@@ -13,6 +13,7 @@ import {
     UseGuards,
     UseInterceptors,
     UploadedFile,
+    Delete,
   } from '@nestjs/common';
   import { JwtAuthGuard } from '../auth/guards/jwt.guard'; // ali kako se imenuje tvoj JWT guard
   import { AuctionsService } from './auctions.service';
@@ -88,6 +89,13 @@ import { saveImageToStorage } from 'helpers/imageStorage';
     listForMe(@Req() req) {
     return this.auctions.listForUser(req.user.id);
 }
+
+
+   @Delete('auctions/:id')
+    @HttpCode(HttpStatus.OK)
+    async remove(@Param('id') id: string): Promise<Auction> {
+      return this.auctions.remove(id); 
+    }
 
   }
   

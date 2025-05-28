@@ -1,10 +1,11 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
 import { BidDto } from './dto/bid.dto';
 import type { Auction, Bid } from '@prisma/client';
 import { AuthService } from '../auth/auth.service';
+import Logging from 'library/Logging';
 
 @Injectable()
 export class AuctionsService {
@@ -36,7 +37,16 @@ export class AuctionsService {
     return auction;
   }
 
-  // Ustvari novo avkcijo za prijavljenega userja 
+  async remove(id: string): Promise<Auction> {
+      await this.findById(id);
+      try {
+        return await this.prisma.auction.delete({ where: { id } });
+      } catch (error) {
+        Logging.error(error);
+        throw new InternalServerErrorException('Something went wrong while removing the user');
+      }
+    }
+  
   async createForUser(userId: string, dto: CreateAuctionDto): Promise<Auction> {
     return this.prisma.auction.create({
       data: {

@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, IsNumber, IsDateString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsString, IsNumber, IsDateString, IsOptional } from 'class-validator';
 
 export class CreateAuctionDto {
   @IsNotEmpty() @IsString()
@@ -7,10 +8,12 @@ export class CreateAuctionDto {
   @IsNotEmpty() @IsString()
   description: string;
 
-  @IsNotEmpty() @IsString()
+  @IsOptional() @IsString()
   image: string;    // ime fajla ali path
 
-  @IsNotEmpty() @IsNumber()
+  @IsNotEmpty() 
+  @Type(() => Number) 
+  @IsNumber()
   startingBid: number;
 
   @IsNotEmpty() @IsDateString()

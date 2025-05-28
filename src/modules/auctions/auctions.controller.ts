@@ -11,6 +11,8 @@ import {
     HttpCode,
     HttpStatus,
     UseGuards,
+    UseInterceptors,
+    UploadedFile,
   } from '@nestjs/common';
   import { JwtAuthGuard } from '../auth/guards/jwt.guard'; // ali kako se imenuje tvoj JWT guard
   import { AuctionsService } from './auctions.service';
@@ -18,6 +20,8 @@ import {
   import { UpdateAuctionDto } from './dto/update-auction.dto';
   import { BidDto } from './dto/bid.dto';
 import { Auction } from '@prisma/client';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { saveImageToStorage } from 'helpers/imageStorage';
   
   @Controller()
   export class AuctionsController {
@@ -25,10 +29,19 @@ import { Auction } from '@prisma/client';
   
     // /me/auction 
     @UseGuards(JwtAuthGuard)
+    @UseInterceptors(FileInterceptor('image', saveImageToStorage))
     @Post('me/auction')
     @HttpCode(HttpStatus.CREATED)
-    createForMe(@Req() req, @Body() dto: CreateAuctionDto) {
-      return this.auctions.createForUser(req.user.id, dto);
+    createForMe(
+      @Req() req, 
+      @UploadedFile() file: Express.Multer.File, 
+      @Body() dto: CreateAuctionDto
+    ) {
+      const payload = {
+      ...dto,
+      image: file.filename,                         // DTO.image bo zdaj filename
+    };
+      return this.auctions.createForUser(req.user.id, payload);
     }
   
     // /me/auction/:id 
@@ -53,7 +66,7 @@ import { Auction } from '@prisma/client';
     @Get('auctions/:id')
     @HttpCode(HttpStatus.OK)
     getOne(@Param('id') id: string): Promise<Auction> {
-      return this.auctions.findById(id); // implementiraš v service, vključi tudi bids
+      return this.auctions.findById(id); 
     }
   
     // /auctions/:id/bid 

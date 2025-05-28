@@ -15,7 +15,12 @@ async function bootstrap() {
     credentials: true,
   })
 
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    
+  }))
   app.use(cookieParser())
 
   const PORT = process.env.PORT || 8080

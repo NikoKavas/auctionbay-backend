@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { RolesModule } from './roles/roles.module';
 import { AuctionsModule } from './auctions/auctions.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -17,6 +19,10 @@ import { AuctionsModule } from './auctions/auctions.module';
       isGlobal: true,
       envFilePath: [`.env.${process.env.STAGE}`],
       validationSchema: configValidationSchema,
+    }),
+    ServeStaticModule.forRoot({
+      serveRoot: '/files',                         // URL na katerem se bodo slike servirale
+      rootPath: join(process.cwd(), 'files'),     // mapa na disku (dist/files)
     }),
     PrismaModule,
     UsersModule,

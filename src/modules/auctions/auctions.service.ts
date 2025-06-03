@@ -3,7 +3,7 @@ import { PrismaService } from '../database/prisma.service';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
 import { BidDto } from './dto/bid.dto';
-import type { Auction, Bid } from '@prisma/client';
+import type { Auction, Bid, User } from '@prisma/client';
 import { AuthService } from '../auth/auth.service';
 import Logging from 'library/Logging';
 
@@ -28,14 +28,40 @@ export class AuctionsService {
     });
   }
 
-    async findById(id: string): Promise<Auction> {
+    async findById(
+    id: string
+  ): Promise<
+    Auction & {
+      bids: (Bid & {
+        user: Pick<User, 'id' | 'first_name' | 'last_name' | 'avatar'>
+      })[]
+    }
+  > {
     const auction = await this.prisma.auction.findUnique({
       where: { id },
-      include: { bids: { orderBy: { createdAt: 'desc' } } },
-    });
-    if (!auction) throw new NotFoundException('Auction not found');
-    return auction;
+      include: {
+        bids: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            user: {
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!auction) {
+      throw new NotFoundException(`Auction with ID ${id} not found`)
+    }
+    return auction
   }
+
 
   async remove(id: string): Promise<Auction> {
       await this.findById(id);
@@ -58,7 +84,8 @@ export class AuctionsService {
     });
   }
 
-  // Posodobi userjovo avkcijo 
+
+
   async updateForUser(userId: string, auctionId: string, dto: UpdateAuctionDto): Promise<Auction> {
     const auction = await this.prisma.auction.findUnique({ where: { id: auctionId } });
     if (!auction) throw new NotFoundException('Auction not found');
@@ -75,7 +102,7 @@ export class AuctionsService {
     });
   }
 
-  // Oddaj bid na avkcijo 
+
   async bidOnAuction(userId: string, auctionId: string, dto: BidDto): Promise<Bid> {
     // preveri, ali aukcija obstaja in je še aktivna
     const auction = await this.prisma.auction.findUnique({ where: { id: auctionId } });
@@ -100,4 +127,18 @@ export class AuctionsService {
       include: { bids: { orderBy: { createdAt: 'desc' } } },
     });
   }
+
+  async listBiddingForUser(userId: string): Promise<Auction[]> {
+    return this.prisma.auction.findMany({
+      where: {
+        endTime: { gt: new Date() },
+        bids: { some: { userId } },
+      },
+      orderBy: { endTime: 'asc' },
+      include: {
+        bids: { orderBy: { createdAt: 'desc' } },
+      }
+    })
+  }
+  
 }

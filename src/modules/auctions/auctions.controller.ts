@@ -28,7 +28,7 @@ import { saveImageToStorage } from 'helpers/imageStorage';
   export class AuctionsController {
     constructor(private readonly auctions: AuctionsService) {}
   
-    // /me/auction 
+  
     @UseGuards(JwtAuthGuard)
     @UseInterceptors(FileInterceptor('image', saveImageToStorage))
     @Post('me/auction')
@@ -45,7 +45,6 @@ import { saveImageToStorage } from 'helpers/imageStorage';
       return this.auctions.createForUser(req.user.id, payload);
     }
   
-    // /me/auction/:id 
     @UseGuards(JwtAuthGuard)
     @Patch('me/auction/:id')
     @HttpCode(HttpStatus.OK)
@@ -57,7 +56,6 @@ import { saveImageToStorage } from 'helpers/imageStorage';
       return this.auctions.updateForUser(req.user.id, auctionId, dto);
     }
   
-    // /auctions 
     @Get('auctions')
     @HttpCode(HttpStatus.OK)
     listActive() {
@@ -66,11 +64,10 @@ import { saveImageToStorage } from 'helpers/imageStorage';
 
     @Get('auctions/:id')
     @HttpCode(HttpStatus.OK)
-    getOne(@Param('id') id: string): Promise<Auction> {
-      return this.auctions.findById(id); 
+    getOne(@Param('id') id: string) {
+      return this.auctions.findById(id)
     }
   
-    // /auctions/:id/bid 
     @UseGuards(JwtAuthGuard)
     @Post('auctions/:id/bid')
     @HttpCode(HttpStatus.CREATED)
@@ -90,6 +87,12 @@ import { saveImageToStorage } from 'helpers/imageStorage';
     return this.auctions.listForUser(req.user.id);
 }
 
+    @UseGuards(JwtAuthGuard)
+    @Get('me/bidding')
+    @HttpCode(HttpStatus.OK)
+    listBiddingForMe(@Req() req) {
+      return this.auctions.listBiddingForUser(req.user.id);
+    }
 
    @Delete('auctions/:id')
     @HttpCode(HttpStatus.OK)

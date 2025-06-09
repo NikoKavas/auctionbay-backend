@@ -40,21 +40,30 @@ import { saveImageToStorage } from 'helpers/imageStorage';
     ) {
       const payload = {
       ...dto,
-      image: file.filename,                         // DTO.image bo zdaj filename
+      image: file.filename,                         
     };
       return this.auctions.createForUser(req.user.id, payload);
     }
   
     @UseGuards(JwtAuthGuard)
+    @UseInterceptors(FileInterceptor('image', saveImageToStorage))
     @Patch('me/auction/:id')
     @HttpCode(HttpStatus.OK)
-    updateForMe(
+    async updateForMe(
       @Req() req,
       @Param('id') auctionId: string,
-      @Body() dto: UpdateAuctionDto,
+      @UploadedFile() file: Express.Multer.File,        
+      @Body() dto: CreateAuctionDto                     
     ) {
-      return this.auctions.updateForUser(req.user.id, auctionId, dto);
+      const payload: Partial<CreateAuctionDto> = { ...dto }
+
+      if (file) {
+        payload.image = file.filename
+      }
+
+      return this.auctions.updateForUser(req.user.id, auctionId, payload as CreateAuctionDto)
     }
+
   
     @Get('auctions')
     @HttpCode(HttpStatus.OK)
@@ -94,11 +103,20 @@ import { saveImageToStorage } from 'helpers/imageStorage';
       return this.auctions.listBiddingForUser(req.user.id);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Get('me/won')
+    @HttpCode(HttpStatus.OK)
+    listWonForMe(@Req() req) {
+      return this.auctions.listWonForUser(req.user.id);
+}
+
    @Delete('auctions/:id')
     @HttpCode(HttpStatus.OK)
     async remove(@Param('id') id: string): Promise<Auction> {
       return this.auctions.remove(id); 
     }
+
+    
 
   }
   

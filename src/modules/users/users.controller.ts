@@ -11,7 +11,9 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
@@ -23,6 +25,7 @@ import { join } from 'path'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UsersService } from './users.service'
+import { JwtAuthGuard } from 'modules/auth/guards/jwt.guard'
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -70,6 +73,16 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async update(@Param('id') id: string, @Body() UpdateUserDto: UpdateUserDto): Promise<User> {
     return this.usersService.update(id, UpdateUserDto)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/profile')
+  @HttpCode(HttpStatus.OK)
+  async updateOwnProfile(
+    @Req() req,
+    @Body() dto: UpdateUserDto
+  ): Promise<User> {
+    return this.usersService.update(req.user.id, dto);
   }
 
   @Delete(':id')

@@ -108,11 +108,9 @@ export class UsersService {
     }
   }
 
-  /** Posodobi obstoječega uporabnika */
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findById(id);
 
-    // Če spreminjaš email, preveri še enkrat unikatnost
     if (dto.email && dto.email !== user.email) {
       const other = await this.prisma.user.findUnique({
         where: { email: dto.email },

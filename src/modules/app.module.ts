@@ -21,8 +21,8 @@ import { join } from 'path';
       validationSchema: configValidationSchema,
     }),
     ServeStaticModule.forRoot({
-      serveRoot: '/files',                         // URL na katerem se bodo slike servirale
-      rootPath: join(process.cwd(), 'files'),     // mapa na disku (dist/files)
+      serveRoot: '/files',                         
+      rootPath: join(process.cwd(), 'files'),     
     }),
     PrismaModule,
     UsersModule,

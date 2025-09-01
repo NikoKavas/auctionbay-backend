@@ -170,7 +170,6 @@ Relationships: `User 1—N Auction`, `Auction 1—N Bid`, `User 1—N Bid`.
 ### Auth
 - `POST /auth/register`
 - `POST /auth/login` → `{ accessToken, refreshToken }`
-- `POST /auth/refresh` → new tokens
 
 Example:
 ```bash

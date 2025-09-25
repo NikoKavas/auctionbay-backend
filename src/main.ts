@@ -11,7 +11,9 @@ async function bootstrap() {
     bufferLogs: true,
   })
   app.enableCors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173',
+      'https://auctionbay-frontend.netlify.app'
+    ],
     credentials: true,
   })
 

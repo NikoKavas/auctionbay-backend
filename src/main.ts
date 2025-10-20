@@ -26,7 +26,7 @@ async function bootstrap() {
   app.use(cookieParser())
 
   const PORT = process.env.PORT || 8080
-  await app.listen(PORT)
+  await app.listen(PORT, '0.0.0.0')
 
   Logging.info(`App is listening on: ${await app.getUrl()}`)
 }

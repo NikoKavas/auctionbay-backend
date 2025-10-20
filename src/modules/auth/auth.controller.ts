@@ -42,7 +42,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response): Promise<User> {
     const access_token = await this.authService.generateJwt(req.user)
-    res.cookie('access_token', access_token, { httpOnly: true })
+    res.cookie('access_token', access_token, { 
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none', 
+    })
     return req.user
   }
 

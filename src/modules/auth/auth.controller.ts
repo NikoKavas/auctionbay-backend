@@ -46,15 +46,16 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none', 
+      path: '/',
     })
     return req.user
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('me')
   @HttpCode(HttpStatus.OK)
   async user(@Req() req: Request): Promise<User> {
-    const cookie = req.cookies['access_token']
-    return this.authService.user(cookie)
+    return req.user as User;
   }
 
   @Post('signout')

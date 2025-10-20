@@ -108,9 +108,10 @@ import { saveImageToStorage } from 'helpers/imageStorage';
     @HttpCode(HttpStatus.OK)
     listWonForMe(@Req() req) {
       return this.auctions.listWonForUser(req.user.id);
-}
+    }
 
-   @Delete('auctions/:id')
+    @UseGuards(JwtAuthGuard)
+    @Delete('auctions/:id')
     @HttpCode(HttpStatus.OK)
     async remove(@Param('id') id: string): Promise<Auction> {
       return this.auctions.remove(id); 

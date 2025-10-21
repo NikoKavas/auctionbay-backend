@@ -2,7 +2,7 @@ const FileType = import('file-type')
 import fs from 'fs'
 import Logging from 'library/Logging'
 import { diskStorage, Options } from 'multer'
-import { extname } from 'path'
+import { extname, join } from 'path'
 
 type validFileExtensionsType = 'png' | 'jpg' | 'jpeg'
 type validMimeType = 'image/png' | 'image/jpg' | 'image/jpeg'
@@ -12,7 +12,7 @@ const validMimeTypes: validMimeType[] = ['image/png', 'image/jpg', 'image/jpeg']
 
 export const saveImageToStorage: Options = {
   storage: diskStorage({
-    destination: './files',
+    destination: join(process.cwd(), 'files') ,
     filename(reg, file, callback) {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
       //get file extension

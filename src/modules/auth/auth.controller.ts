@@ -44,8 +44,8 @@ export class AuthController {
     const access_token = await this.authService.generateJwt(req.user)
     res.cookie('access_token', access_token, { 
       httpOnly: true,
-      secure: true,
-      sameSite: 'none', 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
       path: '/',
     })
     return req.user

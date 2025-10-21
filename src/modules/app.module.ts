@@ -22,7 +22,7 @@ import { join } from 'path';
     }),
     ServeStaticModule.forRoot({
       serveRoot: '/files',
-      rootPath: join(__dirname, '..', '..', 'files'),
+      rootPath: join(__dirname, '..', 'files'),
     }),
     PrismaModule,
     UsersModule,

@@ -21,8 +21,8 @@ import { join } from 'path';
       validationSchema: configValidationSchema,
     }),
     ServeStaticModule.forRoot({
-      serveRoot: '/files',
-      rootPath: join(__dirname, '..', 'files'),
+      serveRoot: '/files',                         
+      rootPath: join(process.cwd(), 'files'),     
     }),
     PrismaModule,
     UsersModule,

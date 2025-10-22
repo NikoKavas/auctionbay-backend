@@ -26,11 +26,12 @@ import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UsersService } from './users.service'
 import { JwtAuthGuard } from 'modules/auth/guards/jwt.guard'
+import { S3Service } from 'library/s3.service'
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService, private readonly s3Service: S3Service) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -51,22 +52,22 @@ export class UsersController {
     return this.usersService.create(createUserDto)
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('upload/:id')
-  @UseInterceptors(FileInterceptor('avatar', saveImageToStorage))
+  @UseInterceptors(FileInterceptor('avatar'))
   @HttpCode(HttpStatus.CREATED)
-  async upload(@UploadedFile() file: Express.Multer.File, @Param('id') id: string): Promise<User> {
-    const filename = file?.filename
+  async upload(@UploadedFile() file: Express.Multer.File, 
+  @Param('id') id: string
+  ): Promise<User> {
+    if (!file) {
+    throw new BadRequestException('File must be a png, jpg or jpeg');
+  }
 
-    if (!filename) {
-      throw new BadRequestException('File must be a png, jpg or jpeg')
-    }
-    const imagesFolderPath = join(process.cwd(), 'files')
-    const fullImagePath = join(imagesFolderPath + '/' + filename)
-    if (await isFileExtensionSafe(fullImagePath)) {
-      return this.usersService.updateUserImageId(id, filename)
-    }
-    removeFile(fullImagePath)
-    throw new BadRequestException('File content does not match extension')
+  // Upload the image to AWS S3
+  const imageUrl = await this.s3Service.uploadFile(file);
+
+  // Save the S3 image URL to the database
+  return this.usersService.updateUserImageId(id, imageUrl);
   }
 
   @Patch(':id')

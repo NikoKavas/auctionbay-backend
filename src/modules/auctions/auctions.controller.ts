@@ -23,30 +23,34 @@ import {
 import { Auction } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { saveImageToStorage } from 'helpers/imageStorage';
+import { S3Service } from 'library/s3.service';
   
   @Controller()
   export class AuctionsController {
-    constructor(private readonly auctions: AuctionsService) {}
+    constructor(private readonly auctions: AuctionsService, private readonly s3Service: S3Service) {}
   
   
     @UseGuards(JwtAuthGuard)
-    @UseInterceptors(FileInterceptor('image', saveImageToStorage))
+    @UseInterceptors(FileInterceptor('image'))
     @Post('me/auction')
     @HttpCode(HttpStatus.CREATED)
-    createForMe(
+    async createForMe(
       @Req() req, 
       @UploadedFile() file: Express.Multer.File, 
-      @Body() dto: CreateAuctionDto
+      @Body() dto: CreateAuctionDto,
+      
     ) {
+      const imageUrl = await this.s3Service.uploadFile(file);
+
       const payload = {
       ...dto,
-      image: file.filename,                         
+      image: imageUrl,                         
     };
       return this.auctions.createForUser(req.user.id, payload);
     }
   
     @UseGuards(JwtAuthGuard)
-    @UseInterceptors(FileInterceptor('image', saveImageToStorage))
+    @UseInterceptors(FileInterceptor('image'))
     @Patch('me/auction/:id')
     @HttpCode(HttpStatus.OK)
     async updateForMe(
@@ -58,7 +62,8 @@ import { saveImageToStorage } from 'helpers/imageStorage';
       const payload: Partial<CreateAuctionDto> = { ...dto }
 
       if (file) {
-        payload.image = file.filename
+        const imageUrl = await this.s3Service.uploadFile(file);
+        payload.image = imageUrl;
       }
 
       return this.auctions.updateForUser(req.user.id, auctionId, payload as CreateAuctionDto)
